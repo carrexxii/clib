@@ -105,8 +105,8 @@ enum Direction {
 	} while (0)
 #define DEFAULT(a, b) (a = (a)? (a): (b))
 
-#define STRING_TF(x) ((x)? "true": "false")
-#define STRING_YN(x) ((x)? "yes" : "no"   )
+#define STR_TF(x) ((x)? "true": "false")
+#define STR_YN(x) ((x)? "yes" : "no"   )
 
 #define SELECT1(_1, ...) _1
 #define SELECT2(_1, _2, ...) _2
@@ -205,6 +205,8 @@ enum Direction {
 			assert(v t);           \
 		}                           \
 	} while (0)
+	#define ASSERT2(v1, t1, v2, t2)         ASSERT(v1, t1), ASSERT(v2, t2)
+	#define ASSERT3(v1, t1, v2, t2, v3, t3) ASSERT(v1, t1), ASSERT(v2, t2), ASSERT(v3, t3)
 #else
 	#define INFO(...)
 	#define WARN(...)
@@ -241,6 +243,7 @@ enum Direction {
 	#define CLIB_IARRAY_IMPLEMENTATION
 	#define CLIB_QUEUE_IMPLEMENTATION
 	#define CLIB_MINHEAP_IMPLEMENTATION
+	#define CLIB_STR_IMPLEMENTATION
 	#define CLIB_STRING_IMPLEMENTATION
 	#define CLIB_FILE_IMPLEMENTATION
 	#define CLIB_HTABLE_IMPLEMENTATION
@@ -253,6 +256,7 @@ enum Direction {
 #include "iarray.h"
 #include "queue.h"
 #include "minheap.h"
+#include "str.h"
 #include "string.h"
 #include "file.h"
 #include "htable.h"

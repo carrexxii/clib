@@ -22,4 +22,5 @@ optimizations, etc.
 - MaxHeap/generalize the binary heap
 - String types for long text
 - Bucket array
+- String builder
 

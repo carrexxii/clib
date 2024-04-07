@@ -46,7 +46,7 @@ struct HTable htable_new(isize count, struct Arena* arena)
 		.arena_is_external = !arena,
 	};
 
-	CLIB_INFO(TERM_BLUE "[CLIB] Created new htable with %ld elements (arena: %s)", count, STRING_TF(arena));
+	CLIB_INFO(TERM_BLUE "[CLIB] Created new htable with %ld elements (arena: %s)", count, STR_TF(arena));
 }
 
 /* PJW Hash Function: https://www.partow.net/programming/hashfunctions/ */

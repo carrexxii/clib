@@ -7,6 +7,7 @@ FILE*  file_open(char* restrict path, char* restrict mode);
 char*  file_load(char* path);
 intptr file_size(FILE* file);
 char*  file_loadf(FILE* file);
+void   file_extension(const char* restrict path, char* restrict fname, char* restrict ext);
 
 /* -------------------------------------------------------------------- */
 
@@ -51,6 +52,19 @@ char* file_loadf(FILE* file)
 
 	fclose(file);
 	return buf;
+}
+
+void file_extension(const char* restrict path, char* restrict fname, char* restrict ext)
+{
+	while (*++path);
+	while (*--path != '/');
+	if (fname) {
+		while ((*fname++ = *++path) != '.');
+		*--fname = '\0'; /* Remove the period */
+	} else {
+		while (*++path != '.');
+	}
+	while ((*ext++ = *++path));
 }
 
 #endif /* CLIB_FILE_IMPLEMENTATION */
