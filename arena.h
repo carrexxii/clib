@@ -1,47 +1,54 @@
-#ifndef UTIL_ARENA_H
-#define UTIL_ARENA_H
+#ifndef CLIB_ARENA_H
+#define CLIB_ARENA_H
+
+#include "common.h"
 
 #define ARENA_RESIZE_FACTOR 2
 #define ARENA_ALIGN_TO      8
 #define ARENA_ALIGN(x)      ((x) += (ARENA_ALIGN_TO - ((x) % ARENA_ALIGN_TO)) % ARENA_ALIGN_TO)
 
 enum ArenaFlag {
-	ARENA_RESIZEABLE = 0x01,
-	ARENA_NO_ALIGN   = 0x02,
+	ARENA_RESIZEABLE = 1 << 0,
+	ARENA_NO_ALIGN   = 1 << 1,
 };
 
 struct Arena {
-	byte* top;
-	isize cap;
 	enum ArenaFlag flags;
-	byte data[];
+	isize cap;
+	byte* top;
+	byte* data;
 };
 
-inline static struct Arena* arena_new(isize sz, enum ArenaFlag flags);
-inline static void* arena_alloc(struct Arena* arena, isize sz);
-inline static void  arena_reset(struct Arena* arena);
-inline static void  arena_free(struct Arena* arena);
+struct Arena arena_new(isize sz, enum ArenaFlag flags);
+void* arena_alloc(struct Arena* arena, isize sz);
+void  arena_reset(struct Arena* arena);
+void  arena_free(struct Arena* arena);
 
-inline static struct Arena* arena_new(isize sz, enum ArenaFlag flags)
+/* -------------------------------------------------------------------- */
+
+#ifdef CLIB_ARENA_IMPLEMENTATION
+
+struct Arena arena_new(isize sz, enum ArenaFlag flags)
 {
-	if (sz <= 0)
-		ERROR("[MEM] Should not create an arena with size <= 0 (%ld)", sz);
+	ASSERT(sz, > 0);
 
 	if (!(flags & ARENA_NO_ALIGN))
 		ARENA_ALIGN(sz);
 
-	struct Arena* arena = smalloc(sizeof(struct Arena) + sz);
-	arena->top   = arena->data;
-	arena->cap   = sz;
-	arena->flags = flags;
+	struct Arena arena = {
+		.cap   = sz,
+		.flags = flags,
+		.data  = smalloc(sz),
+	};
+	arena.top = arena.data;
 
-	DEBUG(3, "[MEM] Created new arena of size %ldB/%ldkB", sz, sz/1024);
+	CLIB_INFO(TERM_BLUE "[CLIB] Created new arena of size %ldB/%ldkB/%ldMB", sz, sz/1024, sz/1024/1024);
 	return arena;
 }
 
-inline static void* arena_alloc(struct Arena* arena, isize in_sz)
+void* arena_alloc(struct Arena* arena, isize in_sz)
 {
-	assert(arena && in_sz > 0);
+	ASSERT(in_sz, > 0);
 
 	isize sz = in_sz;
 	if (!(arena->flags & ARENA_NO_ALIGN))
@@ -50,10 +57,11 @@ inline static void* arena_alloc(struct Arena* arena, isize in_sz)
 	isize avail = arena->cap - (arena->top - arena->data);
 	if (sz > avail) {
 		if (arena->flags & ARENA_RESIZEABLE) {
-			arena->cap = MAX(arena->cap*ARENA_RESIZE_FACTOR, sz);
-			arena = srealloc(arena, sizeof(struct Arena) + arena->cap);
+			arena->cap  = MAX(arena->cap*ARENA_RESIZE_FACTOR, sz);
+			arena->data = srealloc(arena->data, arena->cap);
+			INFO(TERM_BLUE "[CLIB] Arena resized to %ldB", arena->cap);
 		} else {
-			ERROR("[MEM] Arena out of memory.\n\tAvailable: %ldB of %ldB\n\trequested: %ldB",
+			ERROR("[CLIB] Arena out of memory.\n\tAvailable: %ldB of %ldB\n\trequested: %ldB (ARENA_RESIZEABLE not set)",
 			      avail, arena->cap, in_sz);
 			return NULL;
 		}
@@ -63,12 +71,16 @@ inline static void* arena_alloc(struct Arena* arena, isize in_sz)
 	return arena->top - sz;
 }
 
-inline static void arena_reset(struct Arena* arena) {
+void arena_reset(struct Arena* arena)
+{
 	arena->top = arena->data;
 }
 
-inline static void arena_free(struct Arena* arena) {
-	sfree(arena);
+void arena_free(struct Arena* arena)
+{
+	sfree(arena->data);
 }
 
-#endif
+#endif /* CLIB_ARENA_IMPLEMENTATION */
+#endif /* CLIB_ARENA_H */
+

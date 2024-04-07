@@ -1,0 +1,3 @@
+[submodule "tools/bear"]
+	path = tools/bear
+	url = https://github.com/rizsotto/Bear

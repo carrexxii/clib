@@ -1,3 +1,4 @@
+#include "common.h"
 #include "string.h"
 
 /* Length is calculated if it is <= 0 */
@@ -183,3 +184,4 @@ void file_extension(char* restrict file, char* restrict name, char* restrict ext
 	}
 	while ((*ext++ = *++file));
 }
+

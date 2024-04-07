@@ -1,7 +1,7 @@
-#ifndef UTIL_STRINGS_H
-#define UTIL_STRINGS_H
+#ifndef CLIB_STRINGS_H
+#define CLIB_STRINGS_H
 
-#include "arena.h"
+#include "common.h"
 
 typedef struct {
 	isize len, cap;
@@ -30,3 +30,4 @@ bool starts_with(char* restrict str, char* restrict start);
 void file_extension(char* restrict file, char* restrict name, char* restrict ext);
 
 #endif
+

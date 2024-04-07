@@ -1,7 +1,7 @@
-#ifndef UTIL_HASHTABLE_H
-#define UTIL_HASHTABLE_H
+#ifndef CLIB_HTABLE_H
+#define CLIB_HTABLE_H
 
-#include "string.h"
+#include "common.h"
 
 /* TODO:
  *  - Add a resize function and/or copy function
@@ -9,79 +9,96 @@
  */
 
 struct HPair {
-	String key;
-	int64  val;
+	char* key;
+	int64 val;
 	struct HPair* next;
 };
 
 struct HTable {
+	struct Arena arena;
+	bool arena_is_external;
 	isize cap;
-	struct HPair pairs[];
+	struct HPair* pairs;
 };
 
-static inline struct HTable* htable_new(isize count);
-static inline uint htable_hash(struct HTable* htable, String str);
-static inline struct HPair* htable_insert(struct HTable* htable, String key, int64 val);
-static inline struct HPair* htable_get_pair(struct HTable* htable, String key);
-static inline int64 htable_get(struct HTable* htable, String key);
-static inline int64 htable_get_or_insert(struct HTable* htable, String key, int64 val);
-static inline void  htable_print(struct HTable* htable);
-static inline void  htable_free(struct HTable* htable);
+struct HTable htable_new(isize count, struct Arena* arena);
+uint64        htable_hash(struct HTable* restrict htable, char* restrict str);
+struct HPair* htable_insert(struct HTable* restrict htable, char* restrict key, int64 val);
+struct HPair* htable_get_pair(struct HTable* htable, char* key);
+int64         htable_get(struct HTable* restrict htable, char* restrict key);
+int64         htable_get_or_insert(struct HTable* restrict htable, char* restrict key, int64 val);
+int           htable_set(struct HTable* restrict htable, char* restrict key, int64 val);
+void          htable_print(struct HTable* htable);
+void          htable_free(struct HTable* htable);
 
 /* -------------------------------------------------------------------- */
 
-static inline struct HTable* htable_new(isize count)
-{
-	struct HTable* htable = scalloc(sizeof(struct HTable) + count*sizeof(struct HPair), 1);
-	htable->cap = count;
+#ifdef CLIB_HTABLE_IMPLEMENTATION
 
-	return htable;
+struct HTable htable_new(isize count, struct Arena* arena)
+{
+	ASSERT(count, > 0);
+
+	return (struct HTable){
+		.arena = arena? *arena: arena_new(CLIB_HTABLE_SIZE_PER_ELEMENT*count, ARENA_RESIZEABLE),
+		.cap   = count,
+		.pairs = scalloc(count, sizeof(struct HPair)),
+		.arena_is_external = !arena,
+	};
+
+	CLIB_INFO(TERM_BLUE "[CLIB] Created new htable with %ld elements (arena: %s)", count, STRING_TF(arena));
 }
 
 /* PJW Hash Function: https://www.partow.net/programming/hashfunctions/ */
-static inline uint htable_hash(struct HTable* htable, String str)
+uint64 htable_hash(struct HTable* restrict htable, char* restrict str)
 {
-	uint hash = 1315423911;
-	char* c = str.data;
+	uint64 hash = 1315423911;
+	char* c = str;
 	while (*c)
 		hash ^= ((hash << 5) + (*c++) + (hash >> 2));
 
 	return hash % htable->cap;
 }
 
-static inline struct HPair* htable_insert(struct HTable* htable, String key, int64 val)
+struct HPair* htable_insert(struct HTable* restrict htable, char* restrict key, int64 val)
 {
+	assert(key);
+
 	struct HPair* pair = &htable->pairs[htable_hash(htable, key)];
 	/* Only search through the list if first slot is not available */
-	if (pair->key.data) {
+	if (pair->key) {
 		do {
 			/* Check for duplicate keys */
-			if (!strncmp(pair->key.data, key.data, key.len)) // TODO: string_compare()
+			if (!pair->key || !strcmp(pair->key, key))
 				break;
 			if (!pair->next) {
-				pair->next = smalloc(sizeof(struct HPair)); // TODO: Have extra array in hashtable for this
+				pair->next = arena_alloc(&htable->arena, sizeof(struct HPair));
 				pair = pair->next;
-				pair->next = NULL;
+				*pair = (struct HPair){ 0 };
 				break;
 			}
 			pair = pair->next;
 		} while (pair);
 	}
-	if (!pair->key.data)
-		pair->key = string_copy(key, NULL); // TODO: arena
+	if (!pair->key) {
+		isize len = strlen(key);
+		pair->key = arena_alloc(&htable->arena, (len + 1)*sizeof(char));
+		strcpy(pair->key, key);
+		pair->key[len] = '\0';
+	}
 	pair->val = val;
 
 	return pair;
 }
 
 /* Returns NULL if the key was not found */
-static inline struct HPair* htable_get_pair(struct HTable* htable, String key)
+struct HPair* htable_get_pair(struct HTable* restrict htable, char* restrict key)
 {
 	struct HPair* pair = &htable->pairs[htable_hash(htable, key)];
-	if (!pair->key.len)
+	if (!pair->key)
 		return NULL;
 
-	while (strncmp(pair->key.data, key.data, key.len)) {
+	while (strcmp(pair->key, key)) {
 		pair = pair->next;
 		if (!pair)
 			return NULL;
@@ -91,21 +108,23 @@ static inline struct HPair* htable_get_pair(struct HTable* htable, String key)
 }
 
 /* Returns -1 if the key was not found */
-static inline int64 htable_get(struct HTable* htable, String key) {
+int64 htable_get(struct HTable* restrict htable, char* restrict key)
+{
 	struct HPair* pair = htable_get_pair(htable, key);
 	return pair? pair->val
 	           : -1;
 }
 
 /* Same as htable_get, but will insert the value if the key is not present */
-static inline int64 htable_get_or_insert(struct HTable* htable, String key, int64 val) {
+int64 htable_get_or_insert(struct HTable* restrict htable, char* restrict key, int64 val)
+{
 	struct HPair* pair = htable_get_pair(htable, key);
 	return pair? pair->val
 	           : htable_insert(htable, key, val)->val;
 }
 
 /* Returns 0 if the value was set or -1 if the key was not found */
-static inline int htable_set(struct HTable* htable, String key, int64 val)
+int htable_set(struct HTable* restrict htable, char* restrict key, int64 val)
 {
 	// TODO: This should insert if its not there (ie, combine with htable_insert())
 	struct HPair* pair = htable_get_pair(htable, key);
@@ -117,24 +136,28 @@ static inline int htable_set(struct HTable* htable, String key, int64 val)
 	return 0;
 }
 
-static inline void htable_print(struct HTable* htable)
+void htable_print(struct HTable* htable)
 {
-	fprintf(stderr, "Hashtable (capacity: %ld):\n", htable->cap);
+	fprintf(DEBUG_OUTPUT, TERM_BLUE "[CLIB] Hashtable (capacity: %ld):\n" TERM_NORMAL, htable->cap);
 	struct HPair* pair;
 	for (int i = 0; i < htable->cap; i++) {
 		pair = &htable->pairs[i];
-		fprintf(stderr, "\t[%s: %ld]", pair->key.data? pair->key.data: "", pair->val);
+		fprintf(DEBUG_OUTPUT, "\t[%s: %ld]", pair->key? pair->key: "", pair->val);
 		while (pair->next) {
 			pair = pair->next;
-			fprintf(stderr, " -> [%s: %ld]", pair->key.data, pair->val);
+			fprintf(DEBUG_OUTPUT, " -> [%s: %ld]", pair->key, pair->val);
 		}
-		fprintf(stderr, "\n");
+		fprintf(DEBUG_OUTPUT, "\n");
 	}
 }
 
-static inline void htable_free(struct HTable* htable)
+void htable_free(struct HTable* htable)
 {
-	sfree(htable);
+	if (htable->arena_is_external)
+		arena_free(&htable->arena);
+	sfree(htable->pairs);
 }
 
-#endif
+#endif /* CLIB_HTABLE_IMPLEMENTATION */
+#endif /* CLIB_HTABLE_H */
+

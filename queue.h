@@ -1,6 +1,8 @@
 #ifndef UTIL_QUEUE_H
 #define UTIL_QUEUE_H
 
+#include "common.h"
+
 struct Queue {
 	isize elem_sz;
 	isize cap;
@@ -91,9 +93,9 @@ static void queue_print(struct Queue* q)
 {
 	fprintf(stderr, "[UTIL] Queue with %ld capacity and elements of size %ld:\n\t", q->cap, q->elem_sz);
 	for (int i = 0; i < q->cap; i++) {
+		if (i == q->front) fprintf(stderr, "<");
 		fprintf(stderr, "%ld", *(int64*)(q->data + i*q->elem_sz));
-		if (i == q->front) fprintf(stderr, "$");
-		if (i == q->rear)  fprintf(stderr, "^");
+		if (i == q->rear)  fprintf(stderr, ">");
 		if (i != q->cap - 1)
 			fprintf(stderr, " -> ");
 	}
