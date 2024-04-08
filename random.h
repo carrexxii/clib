@@ -1,7 +1,16 @@
+#ifndef CLIB_RANDOM_H
+#define CLIB_RANDOM_H
+
 #include "common.h"
 
+int random_int(int min, int max);
+
+/* -------------------------------------------------------------------- */
+
+#ifdef CLIB_RANDOM_IMPLEMENTATION
+
 /* [min, max] */
-static inline int random_int(int min, int max)
+int random_int(int min, int max)
 {
     int num;
     int div = RAND_MAX / (max + 1);
@@ -11,4 +20,7 @@ static inline int random_int(int min, int max)
 
     return num;
 }
+
+#endif /* CLIB_RANDOM_IMPLEMENTATION */
+#endif /* CLIB_RANDOM_H */
 
