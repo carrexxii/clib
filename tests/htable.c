@@ -5,7 +5,7 @@ void test_htable()
 	INFO(" --- Testing HTable ---");
 
 	INFO("\n - - - - - - - * htable_insert * - - - - - - - ");
-	struct HTable htable = htable_new(16, NULL);
+	struct HTable htable = htable_new(16);
 	htable_insert(&htable, STRING("x"), 1);
 	htable_insert(&htable, STRING("y"), 2);
 	htable_insert(&htable, STRING("table"), 3);

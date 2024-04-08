@@ -3,30 +3,30 @@
 
 #include "common.h"
 
-struct Queue {
+typedef struct Queue {
 	isize elem_sz;
 	isize cap;
 	isize rear;
 	isize front;
 	byte data[];
-};
+} Queue;
 
-static inline struct Queue* queue_new(isize len, isize elem_sz);
-static inline void*         enqueue(struct Queue* restrict q, void* restrict data);
-static inline void*         dequeue(struct Queue* q);
-static inline void*         queue_peek(struct Queue* q);
-static inline bool          queue_is_empty(struct Queue* q);
-static inline void          queue_free(struct Queue* q);
-static        void          queue_print(struct Queue* q);
+static inline Queue* queue_new(isize len, isize elem_sz);
+static inline void*  enqueue(Queue* restrict q, void* restrict data);
+static inline void*  dequeue(Queue* q);
+static inline void*  queue_peek(Queue* q);
+static inline bool   queue_is_empty(Queue* q);
+static inline void   queue_free(Queue* q);
+static        void   queue_print(Queue* q);
 
 /* -------------------------------------------------------------------- */
 
-static inline struct Queue* queue_new(isize len, isize elem_sz)
+static inline Queue* queue_new(isize len, isize elem_sz)
 {
 	assert(elem_sz > 0 && len > 1);
 
-	struct Queue* q = smalloc(sizeof(struct Queue) + len*elem_sz);
-	*q = (struct Queue){
+	Queue* q = smalloc(sizeof(Queue) + len*elem_sz);
+	*q = (Queue){
 		.elem_sz = elem_sz,
 		.cap     = len,
 		.rear    = -1,
@@ -36,7 +36,7 @@ static inline struct Queue* queue_new(isize len, isize elem_sz)
 	return q;
 }
 
-static inline void* enqueue(struct Queue* restrict q, void* restrict data)
+static inline void* enqueue(Queue* restrict q, void* restrict data)
 {
 	assert(q && data);
 
@@ -54,7 +54,7 @@ static inline void* enqueue(struct Queue* restrict q, void* restrict data)
 	return dst;
 }
 
-static inline void* dequeue(struct Queue* q)
+static inline void* dequeue(Queue* q)
 {
 	if (queue_is_empty(q))
 		return NULL;
@@ -70,7 +70,7 @@ static inline void* dequeue(struct Queue* q)
 	return data;
 }
 
-static inline void* queue_peek(struct Queue* q)
+static inline void* queue_peek(Queue* q)
 {
 	if (queue_is_empty(q))
 		return NULL;
@@ -78,18 +78,18 @@ static inline void* queue_peek(struct Queue* q)
 	return q->data + q->front*q->elem_sz;
 }
 
-static inline bool queue_is_empty(struct Queue* q)
+static inline bool queue_is_empty(Queue* q)
 {
 	return q->front == -1;
 }
 
-static inline void queue_free(struct Queue* q)
+static inline void queue_free(Queue* q)
 {
 	q->cap = 0;
 	sfree(q);
 }
 
-static void queue_print(struct Queue* q)
+static void queue_print(Queue* q)
 {
 	fprintf(stderr, "[UTIL] Queue with %ld capacity and elements of size %ld:\n\t", q->cap, q->elem_sz);
 	for (int i = 0; i < q->cap; i++) {

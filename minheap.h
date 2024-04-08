@@ -8,15 +8,15 @@
 #define BUFFER_SIZE   128
 #define NODE_COUNT(d) ((1 << (d)) - 1)
 
-struct MinHeap {
+typedef struct MinHeap {
 	int*  nodes;
 	byte* data;
 	isize elem_sz;
 	isize depth;
 	isize tail;
-};
+} MinHeap;
 
-static inline void minheap_resize(struct MinHeap* heap, isize depth)
+static inline void minheap_resize(MinHeap* heap, isize depth)
 {
 	int nodec = NODE_COUNT(depth);
 	if (depth > heap->depth) {
@@ -28,9 +28,9 @@ static inline void minheap_resize(struct MinHeap* heap, isize depth)
 	}
 }
 
-static inline struct MinHeap minheap_new(int depth, int elem_sz)
+static inline MinHeap minheap_new(int depth, int elem_sz)
 {
-	struct MinHeap heap = {
+	MinHeap heap = {
 		.elem_sz = elem_sz,
 		.tail    = -1,
 		.nodes   = NULL,
@@ -45,10 +45,10 @@ static inline struct MinHeap minheap_new(int depth, int elem_sz)
 static inline int minheap_parent(int i) { return (i - 1)/2; }
 static inline int minheap_left(int i)   { return 2*i + 1;   }
 static inline int minheap_right(int i)  { return 2*i + 2;   }
-static inline void* minheap_get(struct MinHeap* heap, int i) {
+static inline void* minheap_get(MinHeap* heap, int i) {
 	return heap->data + i*heap->elem_sz;
 }
-static inline void minheap_swap(struct MinHeap* heap, int i1, int i2)
+static inline void minheap_swap(MinHeap* heap, int i1, int i2)
 {
 	if (i1 == i2)
 		return;
@@ -62,8 +62,8 @@ static inline void minheap_swap(struct MinHeap* heap, int i1, int i2)
 	memcpy(minheap_get(heap, i2), tmp_buf, heap->elem_sz);
 }
 
-static inline int minheap_min(struct MinHeap* heap) { return heap->nodes[0]; }
-static inline void* minheap_pop(struct MinHeap* heap)
+static inline int minheap_min(MinHeap* heap) { return heap->nodes[0]; }
+static inline void* minheap_pop(MinHeap* heap)
 {
 	void* data = minheap_get(heap, NODE_COUNT(heap->depth));
 	memcpy(data, heap->data, heap->elem_sz);
@@ -88,7 +88,7 @@ static inline void* minheap_pop(struct MinHeap* heap)
 	return data;
 }
 
-static inline int minheap_push(struct MinHeap* heap, int val, void* data)
+static inline int minheap_push(MinHeap* heap, int val, void* data)
 {
 	int i = ++heap->tail;
 	if (i >= NODE_COUNT(heap->depth))
@@ -104,7 +104,7 @@ static inline int minheap_push(struct MinHeap* heap, int val, void* data)
 	return i;
 }
 
-static inline void* minheap_contains_data(struct MinHeap* heap, void* data)
+static inline void* minheap_contains_data(MinHeap* heap, void* data)
 {
 	for (int i = 0; i <= heap->tail; i++)
 		if (!memcmp(minheap_get(heap, i), data, heap->elem_sz))
@@ -113,11 +113,11 @@ static inline void* minheap_contains_data(struct MinHeap* heap, void* data)
 	return NULL;
 }
 
-static inline int  minheap_size(struct MinHeap* heap)     { return heap->tail + 1; }
-static inline bool minheap_is_empty(struct MinHeap* heap) { return heap->tail < 0; }
-static inline void minheap_reset(struct MinHeap* heap)    { heap->tail = 0;        }
+static inline int  minheap_size(MinHeap* heap)     { return heap->tail + 1; }
+static inline bool minheap_is_empty(MinHeap* heap) { return heap->tail < 0; }
+static inline void minheap_reset(MinHeap* heap)    { heap->tail = 0;        }
 
-static inline void minheap_free(struct MinHeap* heap, void (*fn)(void*)) {
+static inline void minheap_free(MinHeap* heap, void (*fn)(void*)) {
 	sfree(heap->nodes);
 	if (fn)
 		for (int i = 0; i < heap->tail; i++)
@@ -125,7 +125,7 @@ static inline void minheap_free(struct MinHeap* heap, void (*fn)(void*)) {
 	sfree(heap->data);
 }
 
-static void minheap_print(struct MinHeap* heap)
+static void minheap_print(MinHeap* heap)
 {
 	INFO(TERM_BLUE "MinHeap with %d nodes (tail: %ld)", NODE_COUNT(heap->depth), heap->tail);
 	isize li, ri, l, r;

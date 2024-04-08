@@ -6,21 +6,21 @@
 #define DEFAULT_IARRAY_SIZE    10
 #define IARRAY_SIZE_MULTIPLIER 1.5
 
-struct IArray {
+typedef struct IArray {
 	intptr  sz;
 	intptr  itemc;
 	intptr  itemsz;
 	bool    sorted;
 	uint16* inds;
 	void*   data;
-};
+} IArray;
 
-struct IArray iarr_new(intptr itemsz, intptr sz);
-void          iarr_resize(struct IArray* arr, intptr itemc);
-void*         iarr_append(struct IArray* arr, intptr i, void* data);
-void*         iarr_get(struct IArray arr, intptr i);
-void          iarr_print(struct IArray arr);
-void          iarr_free(struct IArray* arr, void (*cb)(void*));
+IArray iarr_new(intptr itemsz, intptr sz);
+void   iarr_resize(IArray* arr, intptr itemc);
+void*  iarr_append(IArray* arr, intptr i, void* data);
+void*  iarr_get(IArray arr, intptr i);
+void   iarr_print(IArray arr);
+void   iarr_free(IArray* arr, void (*cb)(void*));
 
 /* -------------------------------------------------------------------- */
 
@@ -29,9 +29,9 @@ void          iarr_free(struct IArray* arr, void (*cb)(void*));
 inline static intptr linear_search(intptr indc, uint16* inds, intptr key);
 inline static intptr bin_search(intptr indc, uint16* inds, intptr key);
 
-struct IArray iarr_new(intptr itemsz, intptr sz)
+IArray iarr_new(intptr itemsz, intptr sz)
 {
-	struct IArray arr = {
+	IArray arr = {
 		.sz     = sz? sz: DEFAULT_IARRAY_SIZE,
 		.itemsz = itemsz,
 		.sorted = true,
@@ -42,14 +42,14 @@ struct IArray iarr_new(intptr itemsz, intptr sz)
 	return arr;
 }
 
-void iarr_resize(struct IArray* arr, intptr sz)
+void iarr_resize(IArray* arr, intptr sz)
 {
 	arr->inds = srealloc(arr->inds, sz*(sizeof(uint16) + arr->itemsz));
 	arr->sz   = sz;
 	arr->data = arr->inds + sz;
 }
 
-void* iarr_append(struct IArray* arr, intptr i, void* data)
+void* iarr_append(IArray* arr, intptr i, void* data)
 {
 	if (arr->itemc >= arr->sz)
 		iarr_resize(arr, arr->sz*IARRAY_SIZE_MULTIPLIER);
@@ -65,7 +65,7 @@ void* iarr_append(struct IArray* arr, intptr i, void* data)
 }
 
 /* Don't think this works */
-void* iarr_get(struct IArray arr, intptr i)
+void* iarr_get(IArray arr, intptr i)
 {
 	intptr arri;
 	if (arr.sorted)
@@ -107,7 +107,7 @@ inline static intptr bin_search(intptr indc, uint16* inds, intptr key)
 	return -1;
 }
 
-void iarr_print(struct IArray arr)
+void iarr_print(IArray arr)
 {
 	fprintf(DEBUG_OUTPUT, TERM_BLUE "IArray:\n\t");
 	for (int i = 0; i < arr.itemc; i++) {
@@ -118,7 +118,7 @@ void iarr_print(struct IArray arr)
 	fprintf(DEBUG_OUTPUT, "\n" TERM_NORMAL);
 }
 
-void iarr_free(struct IArray* arr, void (*cb)(void*))
+void iarr_free(IArray* arr, void (*cb)(void*))
 {
 	if (cb)
 		for (int i = 0; i < arr->itemc; i++)
