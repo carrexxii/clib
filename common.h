@@ -17,13 +17,6 @@
 #include <ctype.h>
 #include <errno.h>
 
-#if !defined __STDC_NO_ATOMICS__
-	#include <stdatomic.h>
-#endif
-#if !defined __STDC_NO_THREADS__
-	#include <threads.h>
-#endif
-
 #if defined __unix__ || (defined __APPLE__ && defined __MACH__)
 	#include <unistd.h>
 #elif defined _WIN32
@@ -46,47 +39,19 @@ typedef unsigned char byte;
 typedef size_t        usize;
 typedef ssize_t       isize;
 
-#define atomic _Atomic
-typedef thrd_t Thread;
-typedef mtx_t  Mutex;
-typedef cnd_t  Condition;
+#if !defined __STDC_NO_ATOMICS__
+	#include <stdatomic.h>
+	#define atomic _Atomic
+#endif
 
-enum Axis {
-	AXIS_NONE,
-	AXIS_X = 1 << 0,
-	AXIS_Y = 1 << 1,
-	AXIS_Z = 1 << 2,
-};
-enum Direction {
-	DIR_NONE         = 0,
-	DIR_UP           = 1 << 0,
-	DIR_DOWN         = 1 << 1,
-	DIR_RIGHT        = 1 << 2,
-	DIR_LEFT         = 1 << 3,
-	DIR_FORWARDS     = 1 << 4,
-	DIR_BACKWARDS    = 1 << 5,
-	DIR_ROTATE_LEFT  = 1 << 6,
-	DIR_ROTATE_RIGHT = 1 << 7,
-	DIR_N            = 1 << 8,
-	DIR_S            = 1 << 9,
-	DIR_E            = 1 << 10,
-	DIR_W            = 1 << 11,
-	DIR_NW           = DIR_N | DIR_W,
-	DIR_NE           = DIR_N | DIR_E,
-	DIR_SW           = DIR_S | DIR_W,
-	DIR_SE           = DIR_S | DIR_E,
-	DIR_ALL          = DIR_N | DIR_S | DIR_E | DIR_W,
-};
+#if !defined __STDC_NO_THREADS__
+	#include <threads.h>
+	typedef thrd_t Thread;
+	typedef mtx_t  Mutex;
+	typedef cnd_t  Condition;
+#endif
 
 #define PPSTR(x) #x
-
-#define UNPACK2(x) x[0], x[1]
-#define UNPACK3(x) x[0], x[1], x[2]
-#define UNPACK4(x) x[0], x[1], x[2], x[3]
-#define UNPACK5(x) x[0], x[1], x[2], x[3], x[4]
-#define UNPACK6(x) x[0], x[1], x[2], x[3], x[4], x[5]
-#define UNPACK7(x) x[0], x[1], x[2], x[3], x[4], x[5], x[6]
-#define UNPACK8(x) x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7]
 
 #ifndef _WIN32
 	#define MIN(a, b) ((a) < (b)? (a): (b))
@@ -95,7 +60,7 @@ enum Direction {
 #define MAX3(a, b, c)    MAX(MAX((a), (b)), (c))
 #define BETWEEN(a, b, c) ((bool)((a) >= (b) && (a) <= (c)))
 #define CLAMP(a, b, c)   do { ((a) = (a) < (b)? (b): (a) > (c)? (c): (a)); } while (0)
-#define ARRAY_SIZE(a)    (sizeof(a) / sizeof(a[0]))
+#define ARRAY_SIZE(a)    (sizeof(a) / sizeof((a)[0]))
 #define DIV_CEIL(a, b)   (((a) + (b) - 1) / (b))
 #define AVERAGE(a, b)    (((a) + (b)) / 2)
 #define SWAP(a, b) do {   \
@@ -107,6 +72,14 @@ enum Direction {
 
 #define STR_TF(x) ((x)? "true": "false")
 #define STR_YN(x) ((x)? "yes" : "no"   )
+
+#define UNPACK2(x) x[0], x[1]
+#define UNPACK3(x) x[0], x[1], x[2]
+#define UNPACK4(x) x[0], x[1], x[2], x[3]
+#define UNPACK5(x) x[0], x[1], x[2], x[3], x[4]
+#define UNPACK6(x) x[0], x[1], x[2], x[3], x[4], x[5]
+#define UNPACK7(x) x[0], x[1], x[2], x[3], x[4], x[5], x[6]
+#define UNPACK8(x) x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7]
 
 #define SELECT1(_1, ...) _1
 #define SELECT2(_1, _2, ...) _2

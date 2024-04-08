@@ -7,9 +7,16 @@ char* str_cat(char* restrict dst, const char* restrict src);
 void  str_split(const char* restrict src, char* restrict dst1, char* restrict dst2, char c);
 void  str_copy(char* restrict dst, const char* restrict src);
 
-bool str_contains(const char* s, char c);
+bool str_contains_char(const char* s, char c);
+bool str_contains_str(const char* restrict s1, const char* restrict s2);
 bool str_starts_with(const char* restrict s, const char* restrict start);
 bool str_ends_with(const char* restrict s, const char* restrict end);
+
+#define str_contains(s, x) _Generic((x), \
+		char : str_contains_char,        \
+		char*: str_contains_str,         \
+		default: str_contains_char       \
+	)((s), (x))
 
 /* -------------------------------------------------------------------- */
 
@@ -48,18 +55,23 @@ void str_split(const char* restrict src, char* restrict dst1, char* restrict dst
 	*dst2 = '\0';
 }
 
-bool str_contains(const char* s, char c)
+bool str_contains_char(const char* s, char c)
 {
-	while (*s)
-		if (*s++ == c)
-			return true;
+	return strchr(s, c);
+}
 
-	return false;
+bool str_contains_str(const char* restrict s1, const char* restrict s2)
+{
+	return strstr(s1, s2);
 }
 
 bool str_starts_with(const char* restrict s, const char* restrict start)
 {
-	return !strncmp(s, start, strlen(start));
+	while (*start)
+		if (*s++ != *start++)
+			return false;
+
+	return true;
 }
 
 bool str_ends_with(const char* restrict s, const char* restrict end)
