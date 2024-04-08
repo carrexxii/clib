@@ -12,30 +12,32 @@ enum ArenaFlag {
 	ARENA_NO_ALIGN   = 1 << 1,
 };
 
-struct Arena {
+typedef struct Arena {
 	enum ArenaFlag flags;
 	isize cap;
 	byte* top;
 	byte* data;
-};
+} Arena;
 
-struct Arena arena_new(isize sz, enum ArenaFlag flags);
-void* arena_alloc(struct Arena* arena, isize sz);
-void  arena_reset(struct Arena* arena);
-void  arena_free(struct Arena* arena);
+Arena  arena_new(isize sz, enum ArenaFlag flags);
+Arena* arena_new_ptr(isize sz, enum ArenaFlag flags);
+void*  arena_alloc(Arena* arena, isize sz);
+void   arena_reset(Arena* arena);
+void   arena_free(Arena* arena);
+void   arena_free_ptr(Arena* arena);
 
 /* -------------------------------------------------------------------- */
 
 #ifdef CLIB_ARENA_IMPLEMENTATION
 
-struct Arena arena_new(isize sz, enum ArenaFlag flags)
+Arena arena_new(isize sz, enum ArenaFlag flags)
 {
 	ASSERT(sz, > 0);
 
 	if (!(flags & ARENA_NO_ALIGN))
 		ARENA_ALIGN(sz);
 
-	struct Arena arena = {
+	Arena arena = {
 		.cap   = sz,
 		.flags = flags,
 		.data  = smalloc(sz),
@@ -46,7 +48,17 @@ struct Arena arena_new(isize sz, enum ArenaFlag flags)
 	return arena;
 }
 
-void* arena_alloc(struct Arena* arena, isize in_sz)
+Arena* arena_new_ptr(isize sz, enum ArenaFlag flags)
+{
+	ASSERT(sz, > 0);
+
+	Arena* arena = smalloc(sizeof(arena));
+	*arena = arena_new(sz, flags);
+
+	return arena;
+}
+
+void* arena_alloc(Arena* arena, isize in_sz)
 {
 	ASSERT(in_sz, > 0);
 
@@ -71,14 +83,21 @@ void* arena_alloc(struct Arena* arena, isize in_sz)
 	return arena->top - sz;
 }
 
-void arena_reset(struct Arena* arena)
+void arena_reset(Arena* arena)
 {
 	arena->top = arena->data;
 }
 
-void arena_free(struct Arena* arena)
+void arena_free(Arena* arena)
 {
 	sfree(arena->data);
+	*arena = (Arena){ 0 };
+}
+
+void arena_free_ptr(Arena* arena)
+{
+	arena_free(arena);
+	sfree(arena);
 }
 
 #endif /* CLIB_ARENA_IMPLEMENTATION */

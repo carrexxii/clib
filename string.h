@@ -11,11 +11,11 @@ typedef struct String {
 #define STRING(x) (String){ .data = (x), .len = sizeof(x) - 1 }
 
 String string_new(const char* restrict cstr, isize len, struct Arena* restrict alloc);
-String string_new_join(isize strc, String* strs, String sep, struct Arena* restrict alloc);
+String string_cat(isize strc, String* strs, String sep, struct Arena* alloc);
 String string_new_split(const char* restrict cstr, char sep, isize index, struct Arena* restrict alloc);
 String string_copy(String str, struct Arena* arena);
 
-int  string_remove(String str, char c);
+int string_remove(String str, char c);
 
 bool string_contains(String str, char c);
 bool string_starts_with(String str, String start);

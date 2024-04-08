@@ -14,6 +14,7 @@ optimizations, etc.
 - Binary heap (MinHeap)
 - Queue (Queue)
 - Hash table (HTable)
+- Strings (C string, String and StringBuilder)
 
 ### TODO
 - Proper tests
@@ -22,5 +23,4 @@ optimizations, etc.
 - MaxHeap/generalize the binary heap
 - String types for long text
 - Bucket array
-- String builder
 

@@ -135,12 +135,12 @@ typedef ssize_t       isize;
 #define TERM_GRAY
 #endif
 
+#ifndef DEBUG_OUTPUT
+	#define DEBUG_OUTPUT stderr
+#endif
 #ifdef DEBUG
 	#define DEBUG_ALLOC_MIN 1024
 
-	#ifndef DEBUG_OUTPUT
-		#define DEBUG_OUTPUT stderr
-	#endif
 	#define D fprintf(DEBUG_OUTPUT, TERM_RED "*** debug marker ***\n" TERM_NORMAL)
 	#define INFO(...) do {                                       \
 				fprintf(DEBUG_OUTPUT, __FILE__ ":%d ", __LINE__); \
@@ -186,7 +186,7 @@ typedef ssize_t       isize;
 	#define ERROR(...)
 	#define DV(x)
 	#define ASSERT(v, t)
-#endif
+#endif /* DEBUG */
 
 #ifndef NO_CLIB_INFO
 	#define CLIB_INFO(...) INFO(__VA_ARGS__)
@@ -209,6 +209,10 @@ typedef ssize_t       isize;
 	#define VARRAY_SIZE_MULTIPLIER 2
 #endif
 
+#ifndef CLIB_SB_RESIZE_FACTOR
+	#define CLIB_SB_RESIZE_FACTOR 2
+#endif
+
 #ifdef CLIB_IMPLEMENTATION
 	#define CLIB_MEMORY_IMPLEMENTATION
 	#define CLIB_ARENA_IMPLEMENTATION
@@ -218,6 +222,7 @@ typedef ssize_t       isize;
 	#define CLIB_MINHEAP_IMPLEMENTATION
 	#define CLIB_STR_IMPLEMENTATION
 	#define CLIB_STRING_IMPLEMENTATION
+	#define CLIB_SB_IMPLEMENTATION
 	#define CLIB_FILE_IMPLEMENTATION
 	#define CLIB_HTABLE_IMPLEMENTATION
 	#define CLIB_RANDOM_IMPLEMENTATION
@@ -231,6 +236,7 @@ typedef ssize_t       isize;
 #include "minheap.h"
 #include "str.h"
 #include "string.h"
+#include "sb.h"
 #include "file.h"
 #include "htable.h"
 #include "random.h"
