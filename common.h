@@ -178,8 +178,8 @@ typedef ssize_t       isize;
 			assert(v t);           \
 		}                           \
 	} while (0)
-	#define ASSERT2(v1, t1, v2, t2)         ASSERT(v1, t1), ASSERT(v2, t2)
-	#define ASSERT3(v1, t1, v2, t2, v3, t3) ASSERT(v1, t1), ASSERT(v2, t2), ASSERT(v3, t3)
+	#define ASSERT2(v1, t1, v2, t2)         do { ASSERT(v1, t1); ASSERT(v2, t2); } while (0)
+	#define ASSERT3(v1, t1, v2, t2, v3, t3) do { ASSERT(v1, t1); ASSERT(v2, t2); ASSERT(v3, t3); } while (0)
 #else
 	#define INFO(...)
 	#define WARN(...)

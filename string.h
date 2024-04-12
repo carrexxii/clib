@@ -8,7 +8,7 @@ typedef struct String {
 	char* data;
 } String;
 
-#define STRING(x) (String){ .data = (x), .len = sizeof(x) - 1 }
+#define STRING(x) (String){ .data = (x), .len = strlen(x), }
 
 String string_new(const char* restrict cstr, isize len, struct Arena* restrict alloc);
 String string_cat(isize strc, String* strs, String sep, struct Arena* alloc);

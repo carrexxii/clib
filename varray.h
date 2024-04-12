@@ -47,7 +47,7 @@ VArray varray_new(isize elemc, isize elem_sz)
 
 void* varray_set(VArray* arr, isize i, void* elem)
 {
-	assert(i >= 0 && i < arr->len);
+	ASSERT2(i, >= 0, i, < arr->len);
 
 	memcpy(arr->data + i*arr->elem_sz, elem, arr->elem_sz);
 
@@ -56,14 +56,14 @@ void* varray_set(VArray* arr, isize i, void* elem)
 
 void* varray_get(VArray* arr, isize i)
 {
-	assert(i >= 0 && i < arr->len);
+	ASSERT2(i, >= 0, i, < arr->len);
 
 	return arr->data + i*arr->elem_sz;
 }
 
 void* varray_pop(VArray* arr)
 {
-	assert(arr->len > 0);
+	ASSERT(arr->len, > 0);
 
 	return arr->data + (--arr->len)*arr->elem_sz;
 }
@@ -78,7 +78,7 @@ isize varray_push(VArray* restrict arr, void* restrict elem)
 
 isize varray_push_many(VArray* restrict arr, isize elemc, void* restrict elems)
 {
-	assert(elemc > 0);
+	ASSERT(elemc, > 0);
 
 	varray_resize(arr, arr->len + elemc, false);
 	memcpy(arr->data + arr->len*arr->elem_sz, elems, elemc*arr->elem_sz);
@@ -89,7 +89,7 @@ isize varray_push_many(VArray* restrict arr, isize elemc, void* restrict elems)
 
 isize varray_push_many_strided(VArray* restrict arr, isize elemc, void* restrict elems, isize offset, isize stride)
 {
-	assert(elemc > 0);
+	ASSERT(elemc, > 0);
 
 	varray_resize(arr, arr->len + elemc, false);
 	byte* data = (byte*)elems + offset;
