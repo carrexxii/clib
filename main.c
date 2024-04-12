@@ -1,4 +1,5 @@
 #define CLIB_IMPLEMENTATION
+#define NO_CLIB_INFO
 #include "clib.h"
 
 // TODO: better testing macros
@@ -15,11 +16,11 @@ int main()
 	INFO("------- Starting Tests -------");
 	INFO("------------------------------");
 
-	// test_arena();
-	// test_varray();
-	// test_queue();
-	// test_htable();
-	// test_string();
+	test_arena();
+	test_varray();
+	test_queue();
+	test_htable();
+	test_string();
 	test_barray();
 
 	INFO("------- Tests Complete -------");

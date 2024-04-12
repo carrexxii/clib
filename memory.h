@@ -36,7 +36,7 @@ void* _smalloc(isize s, const char* file, int line, const char* fn)
 		exit(1);
 	} else {
 		if (s >= DEBUG_ALLOC_MIN)
-			INFO(TERM_BLUE "[CLIB] Allocated %luB (%.2fkB) in \"%s:%d:%s\"", s, (double)s/1024.0, file, line, fn);
+			CLIB_INFO(TERM_BLUE "[CLIB] Allocated %luB (%.2fkB) in \"%s:%d:%s\"", s, (double)s/1024.0, file, line, fn);
 
 		return mem;
 	}
@@ -51,7 +51,7 @@ void* _scalloc(isize n, isize s, const char* file, int line, const char* fn)
 		exit(1);
 	} else {
 		if (b >= DEBUG_ALLOC_MIN)
-			INFO(TERM_BLUE "[CLIB] Allocated %luB (%.2fkB) in \"%s:%d:%s\"", b, (double)b/1024.0, file, line, fn);
+			CLIB_INFO(TERM_BLUE "[CLIB] Allocated %luB (%.2fkB) in \"%s:%d:%s\"", b, (double)b/1024.0, file, line, fn);
 
 		return mem;
 	}
@@ -65,7 +65,7 @@ void* _srealloc(void* mem, isize s, const char* file, int line, const char* fn)
 		exit(1);
 	} else {
 		if (s >= DEBUG_ALLOC_MIN)
-			INFO(TERM_BLUE "[CLIB] Reallocated %luB (%.2fkB) in \"%s:%d:%s\"", s, (double)s/1024.0, file, line, fn);
+			CLIB_INFO(TERM_BLUE "[CLIB] Reallocated %luB (%.2fkB) in \"%s:%d:%s\"", s, (double)s/1024.0, file, line, fn);
 
 		return mem;
 	}

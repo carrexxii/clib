@@ -138,14 +138,18 @@ typedef ssize_t       isize;
 #ifndef DEBUG_OUTPUT
 	#define DEBUG_OUTPUT stderr
 #endif
+#ifndef DEBUG_TRACE
+	#define DEBUG_TRACE false
+#endif
 #ifdef DEBUG
 	#define DEBUG_ALLOC_MIN 1024
 
 	#define D fprintf(DEBUG_OUTPUT, TERM_RED "*** debug marker ***\n" TERM_NORMAL)
-	#define INFO(...) do {                                       \
+	#define INFO(...) do {                                      \
+			if (DEBUG_TRACE)                                     \
 				fprintf(DEBUG_OUTPUT, __FILE__ ":%d ", __LINE__); \
-				fprintf(DEBUG_OUTPUT, __VA_ARGS__);                \
-				fprintf(DEBUG_OUTPUT, "\n" TERM_NORMAL);            \
+			fprintf(DEBUG_OUTPUT, __VA_ARGS__);                    \
+			fprintf(DEBUG_OUTPUT, "\n" TERM_NORMAL);                \
 		} while (0)
 	#define ERROR(...) do {                                     \
 			fprintf(DEBUG_OUTPUT, TERM_RED);                     \
@@ -181,22 +185,22 @@ typedef ssize_t       isize;
 	#define ASSERT2(v1, t1, v2, t2)         do { ASSERT(v1, t1); ASSERT(v2, t2); } while (0)
 	#define ASSERT3(v1, t1, v2, t2, v3, t3) do { ASSERT(v1, t1); ASSERT(v2, t2); ASSERT(v3, t3); } while (0)
 #else
-	#define INFO(...)
-	#define WARN(...)
-	#define ERROR(...)
-	#define DV(x)
-	#define ASSERT(v, t)
+	#define INFO(...)    ((void)0)
+	#define WARN(...)    ((void)0)
+	#define ERROR(...)   ((void)0)
+	#define DV(x)        ((void)0)
+	#define ASSERT(v, t) ((void)0)
 #endif /* DEBUG */
 
 #ifndef NO_CLIB_INFO
 	#define CLIB_INFO(...) INFO(__VA_ARGS__)
 #else
-	#define CLIB_INFO(...)
+	#define CLIB_INFO(...) ((void)0)
 #endif
 #ifndef NO_CLIB_WARN
 	#define CLIB_WARN(...) WARN(__VA_ARGS__)
 #else
-	#define CLIB_WARN(...)
+	#define CLIB_WARN(...) ((void)0)
 #endif
 
 /* -------------------------------------------------------------------- */

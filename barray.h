@@ -20,9 +20,12 @@ typedef struct BArray {
 
 BArray barray_new(isize bucket_sz, isize elem_sz);
 void   barray_alloc_bucket(BArray* arr);
-isize  barray_push(BArray* arr, void* data);
+isize  barray_push(BArray* restrict arr, const void* restrict data);
+void*  barray_pop(BArray* arr);
+void*  barray_get(const BArray* arr, isize i);
+void*  barray_set(BArray* restrict arr, isize i, const void* restrict data);
 void   barray_free(BArray* arr);
-void   barray_print(BArray* arr);
+void   barray_print(const BArray* arr);
 
 /* -------------------------------------------------------------------- */
 
@@ -34,6 +37,8 @@ BArray barray_new(isize bucket_sz, isize elem_sz)
 	ASSERT(elem_sz, > 0);
 
 	DEFAULT(bucket_sz, CLIB_DEFAULT_BUCKET_SIZE);
+	ASSERT(bucket_sz, > elem_sz);
+
 	BArray arr = {
 		.bucket_sz        = bucket_sz,
 		.elem_sz          = elem_sz,
@@ -60,7 +65,7 @@ void barray_alloc_bucket(BArray* arr)
 	b->next->next  = NULL;
 }
 
-isize barray_push(BArray* arr, void* data)
+isize barray_push(BArray* restrict arr, const void* restrict data)
 {
 	intptr gi = 0;
 	Bucket* b = arr->head;
@@ -75,6 +80,43 @@ isize barray_push(BArray* arr, void* data)
 	return b->elemc++;
 }
 
+void* barray_pop(BArray* arr)
+{
+	Bucket* b = arr->head;
+	while (b->next && b->next->elemc)
+		b = b->next;
+
+	b->elemc--;
+	return b->elems + b->elemc*arr->elem_sz;
+}
+
+void* barray_get(const BArray* arr, isize i)
+{
+	ASSERT(i, >= 0);
+
+	Bucket* b = arr->head;
+	isize li = i;
+	while (b) {
+		if (li < b->elemc)
+			return b->elems + li*arr->elem_sz;
+		li -= b->elemc;
+		b = b->next;
+	}
+
+	ERROR("[CLIB] Index %ld is out of bounds for bucket array", i);
+	return NULL;
+}
+
+void* barray_set(BArray* restrict arr, isize i, const void* restrict data)
+{
+	ASSERT2(i, >= 0, data, != NULL);
+
+	void* elem = barray_get(arr, i);
+	memcpy(elem, data, arr->elem_sz);
+
+	return elem;
+}
+
 void barray_free(BArray* arr)
 {
 	Bucket* curr = arr->head;
@@ -86,9 +128,10 @@ void barray_free(BArray* arr)
 	}
 }
 
-void barray_print(BArray* arr)
+void barray_print(const BArray* arr)
 {
-	fprintf(DEBUG_OUTPUT, "Bucket Array [%ldB per bucket | %ldB per element]:\n", arr->bucket_sz, arr->elem_sz);
+	fprintf(DEBUG_OUTPUT, TERM_BLUE "[CLIB] Bucket Array [%ldB per bucket | %ldB per element]:\n",
+	        arr->bucket_sz, arr->elem_sz);
 	Bucket* b = arr->head;
 	for (int i = 0; b; b = b->next, i++) {
 		fprintf(DEBUG_OUTPUT, "\tBucket %d -> %ld/%ld [", i, b->elemc, arr->elems_per_bucket);
@@ -99,6 +142,7 @@ void barray_print(BArray* arr)
 		}
 		fprintf(DEBUG_OUTPUT, "%s]\n", b->elemc > BARRAY_PRINT_ELEMC? "... ": "");
 	}
+	fprintf(DEBUG_OUTPUT, TERM_NORMAL);
 }
 
 #endif /* CLIB_BARRAY_IMPLEMENTATION */
