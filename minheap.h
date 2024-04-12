@@ -1,7 +1,7 @@
 #ifndef CLIB_MINHEAP_H
 #define CLIB_MINHEAP_H
 
-#include "common.h"
+#include "clib.h"
 
 // TODO: MaxHeap or generalize to BinHeap
 

@@ -1,7 +1,7 @@
 #ifndef CLIB_IARRAY_H
 #define CLIB_IARRAY_H
 
-#include "common.h"
+#include "clib.h"
 
 #define DEFAULT_IARRAY_SIZE    10
 #define IARRAY_SIZE_MULTIPLIER 1.5

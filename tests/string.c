@@ -1,4 +1,4 @@
-#include "../common.h"
+#include "../clib.h"
 
 #define BUF_SZ 256
 #define RESET  do {             \

@@ -1,7 +1,7 @@
 #ifndef CLIB_MEMORY_H
 #define CLIB_MEMORY_H
 
-#include "common.h"
+#include "clib.h"
 
 #if DEBUG
 	#define smalloc(sz)       _smalloc((sz),         __FILE__, __LINE__, __func__)

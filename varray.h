@@ -1,7 +1,7 @@
 #ifndef CLIB_VARRAY_H
 #define CLIB_VARRAY_H
 
-#include "common.h"
+#include "clib.h"
 
 // TODO: Add allocator parameters
 // TODO: VLS?

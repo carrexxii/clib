@@ -1,7 +1,7 @@
 #ifndef CLIB_RANDOM_H
 #define CLIB_RANDOM_H
 
-#include "common.h"
+#include "clib.h"
 
 int random_int(int min, int max);
 

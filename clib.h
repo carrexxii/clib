@@ -213,10 +213,15 @@ typedef ssize_t       isize;
 	#define CLIB_SB_RESIZE_FACTOR 2
 #endif
 
+#ifndef CLIB_DEFAULT_BUCKET_SIZE
+	#define CLIB_DEFAULT_BUCKET_SIZE (4096 - (isize)sizeof(Bucket))
+#endif
+
 #ifdef CLIB_IMPLEMENTATION
 	#define CLIB_MEMORY_IMPLEMENTATION
 	#define CLIB_ARENA_IMPLEMENTATION
 	#define CLIB_VARRAY_IMPLEMENTATION
+	#define CLIB_BARRAY_IMPLEMENTATION
 	#define CLIB_IARRAY_IMPLEMENTATION
 	#define CLIB_QUEUE_IMPLEMENTATION
 	#define CLIB_MINHEAP_IMPLEMENTATION
@@ -231,6 +236,7 @@ typedef ssize_t       isize;
 #include "memory.h"
 #include "arena.h"
 #include "varray.h"
+#include "barray.h"
 #include "iarray.h"
 #include "queue.h"
 #include "minheap.h"

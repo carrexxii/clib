@@ -1,7 +1,7 @@
 #ifndef CLIB_HTABLE_H
 #define CLIB_HTABLE_H
 
-#include "common.h"
+#include "clib.h"
 
 /* TODO:
  *  - Add a resize function and/or copy function

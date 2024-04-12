@@ -1,7 +1,7 @@
 #ifndef CLIB_STR_H
 #define CLIB_STR_H
 
-#include "common.h"
+#include "clib.h"
 
 char* str_cat(char* restrict dst, const char* restrict src);
 void  str_split(const char* restrict src, char* restrict dst1, char* restrict dst2, char c);

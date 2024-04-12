@@ -1,7 +1,7 @@
 #ifndef CLIB_STRING_H
 #define CLIB_STRING_H
 
-#include "common.h"
+#include "clib.h"
 
 typedef struct String {
 	isize len;

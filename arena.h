@@ -1,7 +1,7 @@
 #ifndef CLIB_ARENA_H
 #define CLIB_ARENA_H
 
-#include "common.h"
+#include "clib.h"
 
 #define ARENA_RESIZE_FACTOR 2
 #define ARENA_ALIGN_TO      8

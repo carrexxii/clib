@@ -1,7 +1,7 @@
 #ifndef CLIB_FILE_H
 #define CLIB_FILE_H
 
-#include "common.h"
+#include "clib.h"
 
 FILE*  file_open(char* restrict path, char* restrict mode);
 char*  file_load(char* path);

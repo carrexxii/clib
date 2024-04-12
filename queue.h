@@ -1,7 +1,7 @@
 #ifndef UTIL_QUEUE_H
 #define UTIL_QUEUE_H
 
-#include "common.h"
+#include "clib.h"
 
 typedef struct Queue {
 	isize elem_sz;

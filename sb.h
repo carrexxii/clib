@@ -1,7 +1,7 @@
 #ifndef CLIB_SB_H
 #define CLIB_SB_H
 
-#include "common.h"
+#include "clib.h"
 
 typedef struct StringBuilder {
 	isize cap;
