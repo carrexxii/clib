@@ -12,12 +12,13 @@ def parse_file(fname):
 		exit(1)
 
 	with open(path, "r") as file:
-		enum_start = re.compile(r"^\s*(?:enum)\s*(\w+)\s*{\s*$") # enum <name> {
-		enum_end   = re.compile(r"^\s*};\s*$")                   # };
-		enum_val   = re.compile(r"^\s*(\w+)\s*(?:=\s*(.+))?,$")  # <enum> [= value],
+		enum_start = re.compile(r"^\s*(?:typedef)?\s*(?:enum)\s*(\w+)\s*{\s*$") # [typedef] enum <name> {
+		enum_end   = re.compile(r"^\s*}\s*(?:\w*)\s*;\s*$")                     # } [name];
+		enum_val   = re.compile(r"^\s*(\w+)\s*(?:=\s*(.+))?,$")                 # <enum> [= value],
 		for line in file:
 			name = re.match(enum_start, line)
 			if name:
+				print(name[0], name[1])
 				if name in enums:
 					print("Error, duplicate names for enums: ", name, "\n\t", line)
 					exit(1)
@@ -72,6 +73,11 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 
 	for file in args.input_files:
+		print("Parsing \"%s\"..." % file)
 		parse_file(file)
-	output_enums(args.output_file, "a" if args.append else "w")
+
+	if enums == {}:
+		print("Could not find any enums in: ", args.input_files)
+	else:
+		output_enums(args.output_file, "a" if args.append else "w")
 
