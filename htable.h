@@ -10,7 +10,7 @@
 
 typedef struct HPair {
 	String key;
-	int64  val;
+	intptr val;
 	struct HPair* next;
 } HPair;
 
@@ -22,11 +22,11 @@ typedef struct HTable {
 
 HTable htable_new(isize count);
 uint64 htable_hash(HTable* htable, String str);
-HPair* htable_insert(HTable* htable, String key, int64 val);
+HPair* htable_insert(HTable* htable, String key, intptr val);
 HPair* htable_get_pair(HTable* htable, String key);
-int64  htable_get(HTable* htable, String key);
-int64  htable_get_or_insert(HTable* htable, String key, int64 val);
-int    htable_set(HTable* htable, String key, int64 val);
+intptr htable_get(HTable* htable, String key);
+intptr htable_get_or_insert(HTable* htable, String key, intptr val);
+int    htable_set(HTable* htable, String key, intptr val);
 void   htable_print(HTable* htable);
 void   htable_free(HTable* htable);
 
@@ -58,7 +58,7 @@ uint64 htable_hash(HTable* htable, String str)
 	return hash % htable->cap;
 }
 
-HPair* htable_insert(HTable* htable, String key, int64 val)
+HPair* htable_insert(HTable* htable, String key, intptr val)
 {
 	HPair* pair = &htable->pairs[htable_hash(htable, key)];
 	/* Only search through the list if first slot is not available */
@@ -100,7 +100,7 @@ HPair* htable_get_pair(HTable* htable, String key)
 }
 
 /* Returns -1 if the key was not found */
-int64 htable_get(HTable* htable, String key)
+intptr htable_get(HTable* htable, String key)
 {
 	HPair* pair = htable_get_pair(htable, key);
 	return pair? pair->val
@@ -108,7 +108,7 @@ int64 htable_get(HTable* htable, String key)
 }
 
 /* Same as htable_get, but will insert the value if the key is not present */
-int64 htable_get_or_insert(HTable* htable, String key, int64 val)
+intptr htable_get_or_insert(HTable* htable, String key, intptr val)
 {
 	HPair* pair = htable_get_pair(htable, key);
 	return pair? pair->val
@@ -116,7 +116,7 @@ int64 htable_get_or_insert(HTable* htable, String key, int64 val)
 }
 
 /* Returns 0 if the value was set or -1 if the key was not found */
-int htable_set(HTable* htable, String key, int64 val)
+int htable_set(HTable* htable, String key, intptr val)
 {
 	// TODO: This should insert if its not there (ie, combine with htable_insert())
 	HPair* pair = htable_get_pair(htable, key);

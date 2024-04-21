@@ -5,7 +5,6 @@ LINKER = gcc
 
 SRC_DIR   = ./
 BUILD_DIR = ./build
-TOOL_DIR  = ./tools
 
 WARNINGS = -Wall -Wextra -Wno-missing-braces -Wno-unused-function -Wno-unused-parameter
 CFLAGS = -std=c2x -Og -fstrict-aliasing -g2 -ggdb -pipe $(WARNINGS) -ftabstop=4   \
@@ -44,16 +43,7 @@ test: all
 
 .PHONY: restore
 restore: clean
-	@mkdir -p $(TOOL_DIR)
-
-	@cmake -S $(TOOL_DIR)/bear -B $(TOOL_DIR)/bear -DENABLE_UNIT_TESTS=OFF -DENABLE_FUNC_TESTS=OFF
-	@make -C $(TOOL_DIR)/bear -j8
-	@$(TOOL_DIR)/bear/stage/bin/bear                             \
-		--bear-path   $(TOOL_DIR)/bear/stage/bin/bear            \
-		--library     $(TOOL_DIR)/bear/stage/lib/bear/libexec.so \
-		--wrapper     $(TOOL_DIR)/bear/stage/lib/bear/wrapper    \
-		--wrapper-dir $(TOOL_DIR)/bear/stage/lib/bear/wrapper.d  \
-		-- make -j8
+	@bear -- make -j8
 
 .PHONY: clean
 clean:
@@ -65,7 +55,6 @@ clean:
 
 .PHONY: remove
 remove: clean
-	@rm -rf $(TOOL_DIR)/*/
 	@echo "Tools removed"
 
 .PHONY: cloc

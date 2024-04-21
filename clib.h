@@ -37,7 +37,7 @@ typedef intptr_t      intptr;
 typedef uintptr_t     uintptr;
 typedef unsigned char byte;
 typedef size_t        usize;
-typedef ssize_t       isize;
+typedef int64_t       isize;
 
 #if !defined __STDC_NO_ATOMICS__
 	#include <stdatomic.h>
@@ -163,6 +163,10 @@ typedef ssize_t       isize;
 			fprintf(DEBUG_OUTPUT, "\n\t%s:%d in %s\n" TERM_NORMAL, \
 					__FILE__, __LINE__, __func__);                  \
 		} while (0)
+	#define FATAL(...) do { \
+		ERROR(__VA_ARGS__); \
+		exit(1);            \
+	} while(0)
 	#define DV(x) do {                                                                             \
 			fprintf(DEBUG_OUTPUT, __FILE__ ":%d ", __LINE__);                                      \
 			fprintf(DEBUG_OUTPUT, _Generic((x),                                                    \
@@ -185,6 +189,7 @@ typedef ssize_t       isize;
 	#define ASSERT2(v1, t1, v2, t2)         do { ASSERT(v1, t1); ASSERT(v2, t2); } while (0)
 	#define ASSERT3(v1, t1, v2, t2, v3, t3) do { ASSERT(v1, t1); ASSERT(v2, t2); ASSERT(v3, t3); } while (0)
 #else
+	#define DEBUG_ALLOC_MIN 0
 	#define INFO(...)    ((void)0)
 	#define WARN(...)    ((void)0)
 	#define ERROR(...)   ((void)0)

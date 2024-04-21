@@ -5,6 +5,18 @@
 
 #define BARRAY_PRINT_ELEMC 8
 
+#define PPCAT2(a, b) a ## b
+#define PPCAT(a, b)  PPCAT2(a, b)
+#define BARRAY_ITER(_arr, _v)                                                           \
+	int PPCAT(_i, __LINE__) = 0;                                                         \
+	Bucket* PPCAT(_b, __LINE__) = (_arr).head;                                            \
+	for (_v = (void*)PPCAT(_b, __LINE__)->elems;                                           \
+	     (_v = (void*)(PPCAT(_b, __LINE__)->elems + PPCAT(_i, __LINE__)*_arr.elem_sz)) &&   \
+		  PPCAT(_i, __LINE__) < PPCAT(_b, __LINE__)->elemc;                                  \
+	     (PPCAT(_i, __LINE__) == PPCAT(_b, __LINE__)->elemc - 1 && PPCAT(_b, __LINE__)->next) \
+			? ((PPCAT(_i, __LINE__) = 0) && (PPCAT(_b, __LINE__) = PPCAT(_b, __LINE__)->next)) \
+			: PPCAT(_i, __LINE__)++)
+
 typedef struct Bucket {
 	struct Bucket* next;
 	isize elemc;

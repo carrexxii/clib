@@ -56,9 +56,12 @@ void* varray_set(VArray* arr, isize i, void* elem)
 
 void* varray_get(VArray* arr, isize i)
 {
-	ASSERT2(i, >= 0, i, < arr->len);
+	ASSERT2(i, >= -1, i, < arr->len);
 
-	return arr->data + i*arr->elem_sz;
+	if (i == -1)
+		return arr->data + (arr->len++)*arr->elem_sz;
+	else
+		return arr->data + i*arr->elem_sz;
 }
 
 void* varray_pop(VArray* arr)

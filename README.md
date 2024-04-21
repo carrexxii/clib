@@ -10,7 +10,7 @@ optimizations, etc.
 
 ### Current Working Components
 - Variable/resizing array (VArray)
-- Bucket arr (BArray)
+- Bucket array (BArray)
 - Arena allocator (Arena)
 - Binary heap (MinHeap)
 - Queue (Queue)
@@ -23,4 +23,4 @@ optimizations, etc.
 - Memory allocators
 - MaxHeap/generalize the binary heap
 - String types for long text
-
+- Templates
