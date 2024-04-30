@@ -3,8 +3,8 @@
 
 #include "clib.h"
 
-FILE*  file_open(char* restrict path, char* restrict mode);
-char*  file_load(char* path);
+FILE*  file_open(const char* restrict path, const char* restrict mode);
+char*  file_load(const char* path);
 intptr file_size(FILE* file);
 char*  file_loadf(FILE* file);
 void   file_extension(const char* restrict path, char* restrict fname, char* restrict ext);
@@ -13,7 +13,7 @@ void   file_extension(const char* restrict path, char* restrict fname, char* res
 
 #ifdef CLIB_FILE_IMPLEMENTATION
 
-FILE* file_open(char* restrict path, char* restrict mode)
+FILE* file_open(const char* restrict path, const char* restrict mode)
 {
 	FILE* file = fopen(path, mode);
 	fflush(file);
@@ -25,7 +25,7 @@ FILE* file_open(char* restrict path, char* restrict mode)
 	return file;
 }
 
-char* file_load(char* path)
+char* file_load(const char* path)
 {
 	return file_loadf(file_open(path, "rb"));
 }

@@ -5,11 +5,10 @@
 
 /* TODO:
  *  - Add a resize function and/or copy function
- *  - Add a dynamic array for storing linked list elements and strings (arena allocator?)
  */
 
 typedef struct HPair {
-	String key;
+	char*  key;
 	intptr val;
 	struct HPair* next;
 } HPair;
@@ -21,12 +20,12 @@ typedef struct HTable {
 } HTable;
 
 HTable htable_new(isize count);
-uint64 htable_hash(HTable* htable, String str);
-HPair* htable_insert(HTable* htable, String key, intptr val);
-HPair* htable_get_pair(HTable* htable, String key);
-intptr htable_get(HTable* htable, String key);
-intptr htable_get_or_insert(HTable* htable, String key, intptr val);
-int    htable_set(HTable* htable, String key, intptr val);
+uint64 htable_hash(HTable* restrict htable, const char* restrict str);
+HPair* htable_insert(HTable* restrict htable, const char* restrict key, intptr val);
+HPair* htable_get_pair(HTable* restrict htable, const char* restrict key);
+intptr htable_get(HTable* restrict htable, const char* restrict key);
+intptr htable_get_or_insert(HTable* restrict htable, const char* restrict key, intptr val);
+int    htable_set(HTable* restrict htable, const char* restrict key, intptr val);
 void   htable_print(HTable* htable);
 void   htable_free(HTable* htable);
 
@@ -48,24 +47,24 @@ HTable htable_new(isize count)
 }
 
 /* PJW Hash Function: https://www.partow.net/programming/hashfunctions/ */
-uint64 htable_hash(HTable* htable, String str)
+uint64 htable_hash(HTable* restrict htable, const char* restrict str)
 {
 	uint64 hash = 1315423911;
-	char* c = str.data;
+	const char* c = str;
 	while (*c)
 		hash ^= ((hash << 5) + (*c++) + (hash >> 2));
 
 	return hash % htable->cap;
 }
 
-HPair* htable_insert(HTable* htable, String key, intptr val)
+HPair* htable_insert(HTable* restrict htable, const char* restrict key, intptr val)
 {
 	HPair* pair = &htable->pairs[htable_hash(htable, key)];
 	/* Only search through the list if first slot is not available */
-	if (pair->key.data) {
+	if (pair->key) {
 		do {
 			/* Check for duplicate keys */
-			if (!pair->key.data || !strcmp(pair->key.data, key.data))
+			if (!pair->key || !strcmp(pair->key, key))
 				break;
 			if (!pair->next) {
 				pair->next = arena_alloc(&htable->arena, sizeof(HPair));
@@ -76,21 +75,23 @@ HPair* htable_insert(HTable* htable, String key, intptr val)
 			pair = pair->next;
 		} while (pair);
 	}
-	if (!pair->key.data)
-		pair->key = string_copy(key, &htable->arena);
+	if (!pair->key) {
+		pair->key = arena_alloc(&htable->arena, strlen(key));
+		str_copy(pair->key, key);
+	}
 	pair->val = val;
 
 	return pair;
 }
 
 /* Returns NULL if the key was not found */
-HPair* htable_get_pair(HTable* htable, String key)
+HPair* htable_get_pair(HTable* restrict htable, const char* restrict key)
 {
 	HPair* pair = &htable->pairs[htable_hash(htable, key)];
-	if (!pair->key.data)
+	if (!pair->key)
 		return NULL;
 
-	while (strcmp(pair->key.data, key.data)) {
+	while (strcmp(pair->key, key)) {
 		pair = pair->next;
 		if (!pair)
 			return NULL;
@@ -100,7 +101,7 @@ HPair* htable_get_pair(HTable* htable, String key)
 }
 
 /* Returns -1 if the key was not found */
-intptr htable_get(HTable* htable, String key)
+intptr htable_get(HTable* restrict htable, const char* restrict key)
 {
 	HPair* pair = htable_get_pair(htable, key);
 	return pair? pair->val
@@ -108,7 +109,7 @@ intptr htable_get(HTable* htable, String key)
 }
 
 /* Same as htable_get, but will insert the value if the key is not present */
-intptr htable_get_or_insert(HTable* htable, String key, intptr val)
+intptr htable_get_or_insert(HTable* restrict htable, const char* restrict key, intptr val)
 {
 	HPair* pair = htable_get_pair(htable, key);
 	return pair? pair->val
@@ -116,7 +117,7 @@ intptr htable_get_or_insert(HTable* htable, String key, intptr val)
 }
 
 /* Returns 0 if the value was set or -1 if the key was not found */
-int htable_set(HTable* htable, String key, intptr val)
+int htable_set(HTable* restrict htable, const char* restrict key, intptr val)
 {
 	// TODO: This should insert if its not there (ie, combine with htable_insert())
 	HPair* pair = htable_get_pair(htable, key);
@@ -134,10 +135,10 @@ void htable_print(HTable* htable)
 	HPair* pair;
 	for (int i = 0; i < htable->cap; i++) {
 		pair = &htable->pairs[i];
-		fprintf(DEBUG_OUTPUT, "\t[%s: %ld]", pair->key.data? pair->key.data: "", pair->val);
+		fprintf(DEBUG_OUTPUT, "\t[%s: %ld]", pair->key? pair->key: "", pair->val);
 		while (pair->next) {
 			pair = pair->next;
-			fprintf(DEBUG_OUTPUT, " -> [%s: %ld]", pair->key.data, pair->val);
+			fprintf(DEBUG_OUTPUT, " -> [%s: %ld]", pair->key, pair->val);
 		}
 		fprintf(DEBUG_OUTPUT, "\n");
 	}
